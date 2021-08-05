@@ -1,9 +1,9 @@
 package com.danit.springhomeworks.dao;
 
-import com.danit.springhomeworks.entity.Customer;
 import com.danit.springhomeworks.entity.EntityWithLongId;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
 
 abstract public class BaseDao<T extends EntityWithLongId> implements Dao<T> {
     abstract Collection<T> getEntities();

@@ -1,7 +1,5 @@
 package com.danit.springhomeworks.entity;
 
-import lombok.NonNull;
-
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -28,43 +26,43 @@ public class Customer implements EntityWithLongId {
         this.accounts = new ArrayList<>();
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setAccounts(List<Account> accounts) {
-        this.accounts = accounts;
+    public Integer getAge() {
+        return age;
     }
 
     public void setAge(Integer age) {
         this.age = age;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Integer getAge() {
-        return age;
-    }
-
     public List<Account> getAccounts() {
         return accounts;
+    }
+
+    public void setAccounts(List<Account> accounts) {
+        this.accounts = accounts;
     }
 
     public Optional<Long> getId() {
         return Optional.ofNullable(id);
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getEmail() {
         return email;
     }
 
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

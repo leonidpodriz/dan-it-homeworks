@@ -1,7 +1,6 @@
 package com.danit.springhomeworks.controller;
 
 import com.danit.springhomeworks.dao.AccountDao;
-import com.danit.springhomeworks.entity.Account;
 import org.springframework.stereotype.Service;
 
 @Service
