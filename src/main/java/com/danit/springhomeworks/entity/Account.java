@@ -1,5 +1,7 @@
 package com.danit.springhomeworks.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Optional;
 import java.util.UUID;
 
@@ -8,6 +10,7 @@ public class Account implements EntityWithLongId {
     private String number;
     private Currency currency;
     private Double balance;
+    @JsonIgnore
     private Customer customer;
 
     public Account(Customer customer, Currency currency) {

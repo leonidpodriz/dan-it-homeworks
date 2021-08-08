@@ -3,54 +3,60 @@ package com.danit.springhomeworks.controller;
 import com.danit.springhomeworks.dao.AccountDao;
 import com.danit.springhomeworks.dao.CustomerDao;
 import com.danit.springhomeworks.entity.Account;
-import com.danit.springhomeworks.entity.Currency;
 import com.danit.springhomeworks.entity.Customer;
-import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 
-@Service
+@RestController
+@RequiredArgsConstructor
 public class CustomerController {
-    final CustomerDao customerDao;
-    final AccountDao accountDao;
-    final AccountController accountController;
+    private final AccountDao accountDao;
+    private final CustomerDao customerDao;
 
-    public CustomerController(AccountController accountController) {
-        this.customerDao = new CustomerDao();
-        this.accountDao = new AccountDao();
-        this.accountController = accountController;
+    private Customer getCustomer(Long id) {
+        return customerDao.getOne(id).orElseThrow(this::notFound);
     }
 
-    public Optional<Customer> getById(Long id) {
-        return Optional.ofNullable(customerDao.getOne(id));
+    private void linkCustomerAndAccount(Customer customer, Account account) {
+        account.setCustomer(customer);
+        customer.getAccounts().add(account);
     }
 
-    public List<Customer> getAll() {
+    private ResponseStatusException notFound() {
+        return new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to find resource");
+    }
+
+    @GetMapping
+    public List<Customer> getAllCustomers() {
         return customerDao.findAll();
     }
 
-    public Customer create(Customer customer) {
-        customer.setId(null);
-        return update(customer);
-    }
-
-    public Customer update(Customer customer) {
+    @PostMapping
+    public Customer createNewCustomer(@Valid @RequestBody Customer customer) {
         return customerDao.save(customer);
     }
 
-    public boolean delete(Customer customer) {
-        return customerDao.delete(customer);
+    @GetMapping("{id}")
+    public Customer getOneCustomer(@PathVariable Long id) {
+        return getCustomer(id);
     }
 
-    public Account createAccount(Customer customer, Currency currency) {
-        Account account = new Account(customer, currency);
-        accountDao.save(account);
-        customer.getAccounts().add(account);
-        return account;
+    @DeleteMapping("{id}")
+    public ResponseEntity<Void> deleteOneCustomer(@PathVariable Long id) {
+        boolean isSuccessful = customerDao.delete(customerDao.getOne(id).orElseThrow(this::notFound));
+        return new ResponseEntity<>(isSuccessful ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND);
+
     }
 
-    public boolean deleteAccount(Account account) {
-        return accountDao.delete(account);
+    @PostMapping("{id}/accounts")
+    public Account createOneCustomerAccounts(@PathVariable Long id, @RequestBody Account account) {
+        linkCustomerAndAccount(getCustomer(id), account);
+        return accountDao.save(account);
     }
 }
