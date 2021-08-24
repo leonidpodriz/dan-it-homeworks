@@ -16,8 +16,8 @@ public abstract class AbstractDao<T extends EntityWithLongId> implements Dao<T> 
     public T save(T obj) {
         Long id = obj.getId().orElseGet(idGenerator::next);
         obj.setId(id);
-
-        return dbInMemory.put(id, obj);
+        dbInMemory.put(id, obj);
+        return obj;
     }
 
     @Override
