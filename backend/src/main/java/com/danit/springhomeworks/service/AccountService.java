@@ -5,10 +5,12 @@ import com.danit.springhomeworks.dao.AccountDao;
 import com.danit.springhomeworks.entity.Account;
 import com.danit.springhomeworks.entity.Customer;
 import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @AllArgsConstructor
+@Service
 public class AccountService {
     private final AccountDao accountDao;
 
