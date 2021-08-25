@@ -12,6 +12,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
+@CrossOrigin
 @RequiredArgsConstructor
 public class CustomerController {
     private final CustomerService customerService;

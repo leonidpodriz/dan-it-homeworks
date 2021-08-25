@@ -1,18 +1,67 @@
 import './App.css';
-import {Container, makeStyles, Typography} from "@material-ui/core";
+import {
+    Button,
+    Card,
+    CardContent,
+    Container,
+    FormControl,
+    InputLabel,
+    makeStyles,
+    MenuItem,
+    Select,
+    TextField,
+    Typography
+} from "@material-ui/core";
+import {useEffect, useState} from "react";
+import {BASE_URL, CURRENCIES} from "./constants";
+import {getFormData, handleFormControlChange} from "./utils";
+import {getCustomersEffect} from "./effects";
 
-const useStyles = makeStyles((theme) => ({
+
+const createCustomer = async (data) => {
+    const response = await fetch(`${BASE_URL}`, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+            'Content-Type': 'application/json'
+        }, body: JSON.stringify(data) // body data type must match "Content-Type" header
+    });
+
+    return response.json();
+};
+
+const createCustomerAccount = async (customerId, data) => {
+    const response = await fetch(`${BASE_URL}${customerId}/accounts/`, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+            'Content-Type': 'application/json'
+        }, body: JSON.stringify(data) // body data type must match "Content-Type" header
+    });
+
+    return response.json();
+};
+
+
+const useStyles = makeStyles(() => ({
     root: {
-      padding: '20px 0',
+        padding: '20px 0',
     },
     title: {
         paddingBottom: '40px',
     },
+    innerTitle: {
+        marginBottom: '20px',
+    },
+    form: {
+        marginBottom: '30px',
+    },
+    formInput: {
+        marginBottom: '10px',
+        width: '100%',
+    },
     accountCard: {
-        border: '1px solid gray',
-        borderRadius: '5px',
         marginBottom: '15px',
-        padding: '10px 20px',
     },
     accountId: {
         color: 'gray',
@@ -20,212 +69,173 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
+const onPreventedFormSubmit = (func) => (event) => {
+    event.preventDefault();
+    func(event);
+}
+
+const onAccountSubmitFactory = (customerId, currency, allCustomers, setCustomers) => () => {
+    if (!customerId || !currency) return;
+    const customerToUpdate = allCustomers.find(customer => customer.id === customerId);
+
+    createCustomerAccount(customerId, {currency}).then(
+        (newAccount) => {
+            customerToUpdate.accounts = [...customerToUpdate.accounts, newAccount];
+            setCustomers([...allCustomers]);
+        }
+    )
+};
+
+const onCustomerSubmitFactory = (allCustomers, setCustomers) => (event) => {
+    createCustomer(
+        getFormData(event.target)
+    ).then(
+        newCustomer => setCustomers([...allCustomers, newCustomer])
+    );
+}
+
 function App() {
     const classes = useStyles();
-    const customers = [
-        {
-            "id": 1,
-            "name": "Leonid",
-            "email": "leonidpodriz@gmail.com",
-            "age": 19,
-            "accounts": []
-        },
-        {
-            "id": 2,
-            "name": "Leonid",
-            "email": "leonidpodriz@gmail.com",
-            "age": 19,
-            "accounts": [
-                {
-                    "id": 1,
-                    "number": "b8acb750-9709-4c53-85ea-b2544f725a5e",
-                    "currency": "GBP",
-                    "balance": 0.0
-                },
-                {
-                    "id": 2,
-                    "number": "e69b8efd-f127-4b29-94d0-3a8dbed5a19d",
-                    "currency": "GBP",
-                    "balance": 0.0
-                },
-                {
-                    "id": 3,
-                    "number": "6bb91239-f4bb-422e-9d18-d531c15a933a",
-                    "currency": "GBP",
-                    "balance": 0.0
-                },
-                {
-                    "id": 4,
-                    "number": "d4b17fa4-edc8-4720-b6ac-ec9ab075ced5",
-                    "currency": "GBP",
-                    "balance": 0.0
-                },
-                {
-                    "id": 5,
-                    "number": "f3ae33e2-56f8-465a-bcdf-0ba3c60b4723",
-                    "currency": "GBP",
-                    "balance": 0.0
-                },
-                {
-                    "id": 6,
-                    "number": "1cef7960-64dd-47e2-b1bd-819580037f29",
-                    "currency": "GBP",
-                    "balance": 0.0
-                },
-                {
-                    "id": 7,
-                    "number": "786f2177-b553-45c8-b6a3-46e0213cb267",
-                    "currency": "GBP",
-                    "balance": 0.0
-                },
-                {
-                    "id": 8,
-                    "number": "d2e165ba-0fc8-4943-817b-a944ef5fc9f5",
-                    "currency": "GBP",
-                    "balance": 0.0
-                },
-                {
-                    "id": 9,
-                    "number": "fcc07c30-2f04-46bb-acd4-9016ba14de75",
-                    "currency": "GBP",
-                    "balance": 0.0
-                },
-                {
-                    "id": 10,
-                    "number": "b8d8118c-b316-43db-9931-2a7a204b0855",
-                    "currency": "GBP",
-                    "balance": 0.0
-                },
-                {
-                    "id": 11,
-                    "number": "9eb3fd56-a1d2-4572-bed9-18ab56ae8eb7",
-                    "currency": "GBP",
-                    "balance": 0.0
-                },
-                {
-                    "id": 12,
-                    "number": "3f678882-987b-4982-8448-24799ba7b43e",
-                    "currency": "GBP",
-                    "balance": 0.0
-                },
-                {
-                    "id": 13,
-                    "number": "9ac9cb52-fd42-4d7f-9557-beece975df14",
-                    "currency": "GBP",
-                    "balance": 0.0
-                },
-                {
-                    "id": 14,
-                    "number": "93f8b9a1-c951-41fd-a9bf-6a503503e2e0",
-                    "currency": "GBP",
-                    "balance": 0.0
-                },
-                {
-                    "id": 15,
-                    "number": "dd41eb4e-ab25-4c37-8914-69a5af2d965d",
-                    "currency": "GBP",
-                    "balance": 0.0
-                }
-            ]
-        },
-        {
-            "id": 3,
-            "name": "Leonid",
-            "email": "leonidpodriz@gmail.com",
-            "age": 19,
-            "accounts": []
-        },
-        {
-            "id": 4,
-            "name": "Leonid",
-            "email": "leonidpodriz@gmail.com",
-            "age": 19,
-            "accounts": []
-        },
-        {
-            "id": 5,
-            "name": "Leonid",
-            "email": "leonidpodriz@gmail.com",
-            "age": 19,
-            "accounts": []
-        },
-        {
-            "id": 6,
-            "name": "Leonid",
-            "email": "leonidpodriz@gmail.com",
-            "age": 19,
-            "accounts": []
-        },
-        {
-            "id": 7,
-            "name": "Leonid",
-            "email": "leonidpodriz@gmail.com",
-            "age": 19,
-            "accounts": []
-        },
-        {
-            "id": 8,
-            "name": "Leonid",
-            "email": "leonidpodriz@gmail.com",
-            "age": 19,
-            "accounts": []
-        },
-        {
-            "id": 9,
-            "name": "Leonid",
-            "email": "leonidpodriz@gmail.com",
-            "age": 19,
-            "accounts": []
-        },
-        {
-            "id": 10,
-            "name": "Leonid",
-            "email": "leonidpodriz@gmail.com",
-            "age": 19,
-            "accounts": []
-        },
-        {
-            "id": 11,
-            "name": "Leonid",
-            "email": "leonidpodriz@gmail.com",
-            "age": 19,
-            "accounts": []
-        }
-    ];
+    const [allCustomers, setAllCustomers] = useState([]);
+    const [currency, setCurrency] = useState(null);
+    const [customer, setCustomer] = useState(null);
+
+    useEffect(getCustomersEffect(setAllCustomers), []);
+
+    const onCustomerSubmit = onPreventedFormSubmit(onCustomerSubmitFactory(allCustomers, setAllCustomers));
+
+    const onAccountSubmit = onPreventedFormSubmit(
+        onAccountSubmitFactory(customer, currency, allCustomers, setAllCustomers)
+    );
+
+
     return (
         <Container maxWidth="sm" className={classes.root}>
             <Typography variant="h2" className={classes.title}>
                 Bank
             </Typography>
+            <form onSubmit={onCustomerSubmit} className={classes.form}>
+                <Typography variant="h5" className={classes.innerTitle}>
+                    Create customer
+                </Typography>
+
+                <TextField
+                    id="name"
+                    variant='outlined'
+                    label="Full name"
+                    name="name"
+                    fullWidth
+                    className={classes.formInput}
+                    required
+                />
+
+                <TextField
+                    id="age"
+                    variant='outlined'
+                    label="Age"
+                    name="age"
+                    inputMode='numeric'
+                    type='number'
+                    fullWidth
+                    className={classes.formInput}
+                    required
+                />
+
+                <TextField
+                    id="email"
+                    variant='outlined'
+                    label="Email"
+                    inputMode="email"
+                    fullWidth
+                    className={classes.formInput}
+                    name="email"
+                    required
+                />
+
+                <Button variant='contained' color='primary' type='submit'>Create</Button>
+            </form>
+            <form onSubmit={onAccountSubmit}>
+                <Typography variant="h5" className={classes.innerTitle}>
+                    Create account
+                </Typography>
+
+                <FormControl variant="outlined" className={classes.formInput} required>
+                    <InputLabel id="demo-simple-select-outlined-label">Currency</InputLabel>
+                    <Select
+                        labelId="demo-simple-select-outlined-label"
+                        id="demo-simple-select-outlined"
+                        label="Currency"
+                        fullWidth
+                        onChange={handleFormControlChange(setCurrency)}
+                        value={currency}
+                    >
+                        {CURRENCIES.map(currency => <MenuItem value={currency}>{currency}</MenuItem>)}
+                    </Select>
+                </FormControl>
+
+
+                <FormControl variant="outlined" className={classes.formInput} required>
+                    <InputLabel id="demo-simple-select-outlined-label">Customer</InputLabel>
+                    <Select
+                        labelId="demo-simple-select-outlined-label"
+                        id="demo-simple-select-outlined"
+                        label="Customer"
+                        onChange={handleFormControlChange(setCustomer)}
+                        value={customer}
+                    >
+                        {
+                            allCustomers.map(customer => (
+                                <MenuItem value={customer.id}>{customer.name}</MenuItem>
+                            ))
+                        }
+                    </Select>
+                </FormControl>
+
+                <Button variant='contained' color='primary' type='submit'>Create</Button>
+
+            </form>
             <div>
                 <h2>Accounts</h2>
                 {
-                    customers.map( customer => {
+                    allCustomers.map(customer => {
                         return (
-                            <div className={classes.accountCard}>
-                                <h3>
-                                    <span className={classes.accountId}>{customer.id}</span>
-                                    {customer.name}
-                                </h3>
-                                <ul>
-                                    <li>Email: {customer.email}</li>
-                                    <li>Age: {customer.age}</li>
-                                </ul>
+                            <Card variant='outlined' className={classes.accountCard}>
+                                <CardContent>
+                                    <Typography color="textSecondary" gutterBottom>
+                                        ID: {customer.id}
+                                    </Typography>
+                                    <Typography variant="h5" component="h2">
+                                        {customer.name}
+                                    </Typography>
+                                    <Typography color="textSecondary">
+                                        {customer.email}
+                                    </Typography>
+                                    <Typography variant="body2" component="p">
+                                        Age: {customer.age}
+                                    </Typography>
+                                    {
+                                        customer.accounts.length !== 0 ? (
+                                            <>
+                                                <h4>Accounts</h4>
+                                                {
+                                                    customer.accounts.map(account => {
+                                                        return (
+                                                            <div>
+                                                                <pre>{account.number}</pre>
+                                                                {account.balance} {account.currency}
+                                                                <hr/>
+                                                            </div>
+                                                        )
+                                                    })
+                                                }
+                                            </>
+                                        ) : null
+                                    }
 
-                                <h4>Accounts</h4>
-                                {
-                                    customer.accounts.map(account => {
-                                        return (
-                                            <div>
-                                                <pre>{account.number}</pre>
-                                                {account.balance} {account.currency}
-                                                <hr/>
-                                            </div>
-                                        )
-                                    })
-                                }
 
-                            </div>
+                                </CardContent>
+
+                            </Card>
                         )
                     })
                 }
